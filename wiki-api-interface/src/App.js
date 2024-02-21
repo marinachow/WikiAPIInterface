@@ -9,7 +9,7 @@ const App = () => {
 
   return (
     <div>
-      <h1>Wifi API Interface</h1>
+      <h1>Wiki API Interface</h1>
       <Search onSearch={handleSearch} />
     </div>
   );

@@ -1,5 +1,6 @@
 // Search.js
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const Search = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -8,10 +9,15 @@ const Search = ({ onSearch }) => {
     setSearchTerm(event.target.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    onSearch(searchTerm);
-  };
+    try {
+      const response = await axios.get(`http://localhost:5000/search?term=${searchTerm}`);
+      onSearch(response.data);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
+    }
+  };  
 
   return (
     <form onSubmit={handleSubmit}>

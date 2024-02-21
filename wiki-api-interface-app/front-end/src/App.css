@@ -36,3 +36,39 @@
     transform: rotate(360deg);
   }
 }
+
+/* Existing styles... */
+
+/* Navigation Bar styles */
+nav {
+  width: 100%;
+  background-color: #007bff; /* Example color */
+  padding: 10px 0;
+  text-align: center;
+  color: white;
+}
+
+/* Centering the search bar */
+.search-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Adjust based on your layout */
+  transition: all 0.5s ease-in-out;
+}
+
+/* Animation for the search bar disappearing */
+.search-container.hide {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+/* Styling and animation for search results */
+.search-results {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.search-results.show {
+  opacity: 1;
+}

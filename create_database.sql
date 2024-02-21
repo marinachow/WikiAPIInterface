@@ -12,5 +12,8 @@ CREATE TABLE IF NOT EXISTS SearchResults (
     language_id INT,
     title VARCHAR(255) NOT NULL,
     snippet TEXT NOT NULL,
+    link TEXT NOT NULL,
+    date DATE,
+    wordcount INT,
     FOREIGN KEY (language_id) REFERENCES ProgrammingLanguages(id)
 );

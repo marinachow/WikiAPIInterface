@@ -15,21 +15,49 @@ const pool = mysql.createPool({
 });
 
 // Define API endpoint for search
+// Define API endpoint for search
 app.get('/search', (req, res) => {
-  const searchTerm = req.query.term;
-
-  // Query database for search results
-  pool.query(
-    'SELECT * FROM SearchResults WHERE title LIKE ?',
-    [`%${searchTerm}%`],
-    (error, results) => {
-      if (error) {
-        res.status(500).json({ error: 'Internal server error' });
-        return;
-      }
-      res.json(results);
+    const searchTerm = req.query.term;
+    const minDate = req.query.mindate;
+    const maxDate = req.query.maxdate;
+    const minWordCount = req.query.minwordcount;
+    const maxWordCount = req.query.maxwordcount;
+    const sortBy = req.query.sortby; // New sorting parameter
+  
+    // Construct the SQL query based on filters and sorting
+    let sqlQuery = 'SELECT * FROM SearchResults WHERE title LIKE ?';
+    let sqlParams = [`%${searchTerm}%`];
+  
+    if (minDate && maxDate) {
+      sqlQuery += ' AND date BETWEEN ? AND ?';
+      sqlParams.push(minDate, maxDate);
     }
-  );
+  
+    if (minWordCount && maxWordCount) {
+      sqlQuery += ' AND wordcount BETWEEN ? AND ?';
+      sqlParams.push(minWordCount, maxWordCount);
+    }
+  
+    if (sortBy === 'alphabetical') {
+      sqlQuery += ' ORDER BY title'; // Sort alphabetically by title
+    } else if (sortBy === 'date') {
+      sqlQuery += ' ORDER BY date'; // Sort by date
+    } else if (sortBy === 'wordcount') {
+      sqlQuery += ' ORDER BY wordcount'; // Sort by word count
+    }
+  
+    // Query database for search results
+    pool.query(
+      sqlQuery,
+      sqlParams,
+      (error, results) => {
+        if (error) {
+          res.status(500).json({ error: 'Internal server error' });
+          return;
+        }
+        res.json(results);
+      }
+    );
 });
 
 // Start the server

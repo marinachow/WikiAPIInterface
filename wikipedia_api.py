@@ -1,7 +1,7 @@
 import mysql.connector
 import requests
+from datetime import datetime
 
-# Define the URL of the Wikipedia API endpoint
 WIKIPEDIA_API_URL = "https://en.wikipedia.org/w/api.php"
 
 # MySQL database configuration
@@ -18,7 +18,10 @@ def search_wikipedia(query):
         "action": "query",
         "format": "json",
         "list": "search",
-        "srsearch": query
+        "srsearch": query,
+        "utf8": 1,
+        "prop": "info",
+        "inprop": "url|talkid|displaytitle"
     }
 
     # Make a request to the Wikipedia API
@@ -34,6 +37,8 @@ def search_wikipedia(query):
         print("Error: Unable to fetch data from Wikipedia API")
         return None
 
+from datetime import datetime
+
 def store_search_results(language, search_results, cursor):
     # Insert programming language into ProgrammingLanguages table
     cursor.execute("INSERT INTO ProgrammingLanguages (language_name) VALUES (%s)", (language,))
@@ -41,8 +46,20 @@ def store_search_results(language, search_results, cursor):
 
     # Insert search results into SearchResults table
     for result in search_results:
-        cursor.execute("INSERT INTO SearchResults (language_id, title, snippet) VALUES (%s, %s, %s)",
-                       (language_id, result['title'], result['snippet']))
+        # Construct the link for the article
+        base_wikipedia_url = "https://en.wikipedia.org/wiki/"
+        page_id = result['pageid']
+        article_title = result['title'].replace(" ", "_")  # Replace spaces with underscores
+        article_link = base_wikipedia_url + article_title
+        wordcount = result.get('wordcount', None)
+        date = result.get('timestamp', None)
+
+        # Insert the search result into the database
+        cursor.execute("INSERT INTO SearchResults (language_id, title, snippet, link, date, wordcount) VALUES (%s, %s, %s, %s, %s, %s)",
+               (language_id, result['title'], result['snippet'], article_link, date, wordcount))
+
+    # Commit the changes to the database
+    conn.commit()
 
 if __name__ == "__main__":
     # Connect to the MySQL database
@@ -50,7 +67,7 @@ if __name__ == "__main__":
     cursor = conn.cursor()
 
     # List of programming languages
-    programming_languages = ["Python", "Java", "JavaScript", "C++", "Ruby", "Go", "Swift"]
+    programming_languages = ["Python", "Java", "JavaScript", "Ruby", "Go", "Swift"]
 
     # Iterate through each programming language and search Wikipedia
     for language in programming_languages:

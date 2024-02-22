@@ -14,15 +14,14 @@ const pool = mysql.createPool({
   database: 'wiki_db'
 });
 
-// Define API endpoint for search
-// Define API endpoint for search
+// API endpoint for search
 app.get('/search', (req, res) => {
     const searchTerm = req.query.term;
     const minDate = req.query.mindate;
     const maxDate = req.query.maxdate;
     const minWordCount = req.query.minwordcount;
     const maxWordCount = req.query.maxwordcount;
-    const sortBy = req.query.sortby; // New sorting parameter
+    const sortBy = req.query.sortby;
   
     // Construct the SQL query based on filters and sorting
     let sqlQuery = 'SELECT * FROM SearchResults WHERE title LIKE ?';
@@ -31,19 +30,31 @@ app.get('/search', (req, res) => {
     if (minDate && maxDate) {
       sqlQuery += ' AND date BETWEEN ? AND ?';
       sqlParams.push(minDate, maxDate);
+    } else if (minDate) {
+      sqlQuery += ' AND date >= ?';
+      sqlParams.push(minDate);
+    } else if (maxDate) {
+      sqlQuery += ' AND date <= ?';
+      sqlParams.push(maxDate);
     }
   
     if (minWordCount && maxWordCount) {
       sqlQuery += ' AND wordcount BETWEEN ? AND ?';
       sqlParams.push(minWordCount, maxWordCount);
+    } else if (minWordCount) {
+      sqlQuery += ' AND wordcount >= ?';
+      sqlParams.push(minWordCount);
+    } else if (maxWordCount) {
+      sqlQuery += ' AND wordcount <= ?';
+      sqlParams.push(maxWordCount);
     }
   
     if (sortBy === 'alphabetical') {
-      sqlQuery += ' ORDER BY title'; // Sort alphabetically by title
+      sqlQuery += ' ORDER BY title';
     } else if (sortBy === 'date') {
-      sqlQuery += ' ORDER BY date'; // Sort by date
+      sqlQuery += ' ORDER BY date';
     } else if (sortBy === 'wordcount') {
-      sqlQuery += ' ORDER BY wordcount'; // Sort by word count
+      sqlQuery += ' ORDER BY wordcount';
     }
   
     // Query database for search results
@@ -59,6 +70,7 @@ app.get('/search', (req, res) => {
       }
     );
 });
+
 
 // Start the server
 app.listen(port, () => {
